@@ -1,70 +1,42 @@
-var path         = require('path');
-var readFileSync = require('fs').readFileSync;
-var url          = require('url');
+const puppeteer = require("puppeteer");
+const mainTemplate = require("./convert/converter.html");
+const mermaidJs = require("!raw-loader!mermaid/dist/mermaid.min.js");
+const initScript = require("!raw-loader!./initScript");
 
-var phantom = require('phantom');
-var Q       = require('q');
+const renderToSvg = mermaidCode => {
+  /* eslint-disable */
+  var container = document.getElementById("container");
+  var holder = document.getElementById("mermaid-holder");
+  while (holder.firstChild) {
+    holder.removeChild(holder.firstChild);
+  }
+  var el;
+  el = document.createElement("div");
+  el.innerHTML = mermaidCode;
+  el.className = "mermaid";
+  holder.appendChild(el);
+  mermaid.init();
+  var xmlSerializer = new XMLSerializer();
+  svgValue = xmlSerializer.serializeToString(container);
 
+  return svgValue;
+};
 
-const PHANTOMJS_MODULE = require.resolve('phantomjs')
-const PHANTOMJS_BIN = path.resolve(PHANTOMJS_MODULE, '../../bin', 'phantomjs')
-
+const convertMermaidCodeToSvg = async mermaidCode => {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.setContent(mainTemplate);
+  await page.evaluate(mermaidJs);
+  await page.evaluate(initScript);
+  const output = await page.evaluate(renderToSvg, mermaidCode);
+  browser.close();
+  return output;
+};
 
 module.exports = {
   blocks: {
     mermaid: {
-      process: function(block) {
-        var body = block.body;
-
-        var src = block.kwargs.src;
-        if(src) {
-          var relativeSrcPath = url.resolve(this.ctx.file.path, src)
-          var absoluteSrcPath = decodeURI(path.resolve(this.book.root, relativeSrcPath))
-          body = readFileSync(absoluteSrcPath, 'utf8')
-        }
-
-        return processBlock(body);
-      }
+      process: async block => convertMermaidCodeToSvg(block.body)
     }
   }
 };
-
-function processBlock(body) {
-  return convertToSvg(body)
-      .then(function (svgCode) {
-          return svgCode.replace(/mermaidChart1/g, getId());
-      });
-}
-
-function convertToSvg(mermaidCode) {
-  var deferred = Q.defer();
-  phantom.create({binary: PHANTOMJS_BIN}, function (ph) {
-    ph.createPage(function (page) {
-
-      var htmlPagePath = path.join(__dirname, 'convert/converter.html');
-
-      page.open(htmlPagePath, function (status) {
-        page.evaluate(
-          function (code) {
-            return renderToSvg(code);
-          },
-          function (result) {
-            ph.exit();
-            deferred.resolve(result);
-          },
-          mermaidCode);
-      });
-    });
-  });
-
-  return deferred.promise;
-}
-
-function getId() {
-  function s4() {
-    return Math.floor((1 + Math.random()) * 0x10000)
-      .toString(16)
-      .substring(1);
-  }
-  return "mermaidChart-" + s4() + s4();
-}
