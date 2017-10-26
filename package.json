@@ -29,6 +29,6 @@
   },
   "scripts": {
     "build": "webpack",
-    "prebublishOnly": "npm run build"
+    "prepare": "npm run build"
   }
 }
