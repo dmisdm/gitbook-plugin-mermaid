@@ -1,0 +1,23 @@
+/* #mermaidChart0 text {
+  font-size: 1.4rem;
+  font-family: inherit !important;
+}
+
+#mermaidChart0 > svg {
+  font-family: inherit;
+}
+
+#mermaidChart0 .node rect,
+#mermaidChart0 .node circle,
+#mermaidChart0 .node ellipse,
+#mermaidChart0 .node polygon {
+  fill: #0056a4;
+}
+
+#mermaidChart0 .node text {
+  fill: white;
+}
+#mermaidChart0 .node .label {
+  fill: white;
+}
+ */

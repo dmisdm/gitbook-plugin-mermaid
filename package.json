@@ -11,9 +11,11 @@
     "url": "https://github.com/dmisdm/gitbook-plugin-mermaid.git"
   },
   "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "jsdom": "^11.3.0",
+    "json-stringify-safe": "^5.0.1",
     "mermaid": "^7.1.0",
-    "puppeteer": "^0.12.0",
-    "babel-polyfill": "^6.26.0"
+    "puppeteer": "^0.12.0"
   },
   "license": "Apache 2",
   "devDependencies": {
@@ -30,5 +32,14 @@
   "scripts": {
     "build": "webpack",
     "prepare": "npm run build"
+  },
+  "gitbook": {
+    "properties": {
+      "logLevel": {
+        "type": "number",
+        "default": 5,
+        "description": "Log Level"
+      }
+    }
   }
 }
